@@ -104,3 +104,114 @@ Building configuration...
 [OK]
 ```
 
+### Часть 2. Ручная настройка IPv6-адресов.
+
+Шаг 1. Назначим IPv6-адреса интерфейсам Ethernet на R1.
+
+*  a)	Назначим глобальные индивидуальные IPv6-адреса, указанные в таблице адресации обоим интерфейсам Ethernet на R1.
+
+```
+Router>en
+Router#conf t
+R1(config)#int g0/0/0
+R1(config-if)#ipv6 address 2001:db8:acad:a::1/64
+R1(config-if)#no sh
+
+R1(config-if)#
+%LINK-5-CHANGED: Interface GigabitEthernet0/0/0, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0/0/0, changed state to up
+
+R1(config-if)#int g0/0/1
+R1(config-if)#ipv6 address 2001:db8:acad:1::1/64
+R1(config-if)#no sh
+
+R1(config-if)#
+%LINK-5-CHANGED: Interface GigabitEthernet0/0/1, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0/0/1, changed state to up
+
+```
+
+* b)	Введем команду show ipv6 interface brief, чтобы проверить, назначен ли каждому интерфейсу корректный индивидуальный IPv6-адрес.
+
+```
+R1#sh ipv6 int br
+GigabitEthernet0/0/0       [up/up]
+    FE80::202:16FF:FEC6:7B01
+    2001:DB8:ACAD:A::1
+GigabitEthernet0/0/1       [up/up]
+    FE80::202:16FF:FEC6:7B02
+    2001:DB8:ACAD:1::1
+Vlan1                      [administratively down/down]
+    unassigned
+```
+
+* c)	Чтобы обеспечить соответствие локальных адресов канала индивидуальному адресу, вручную введем локальные адреса канала на каждом интерфейсе Ethernet на R1.
+
+```
+R1(config)#int g0/0/0
+R1(config-if)#ipv6 address fe80::1 link-local
+R1(config-if)#int g0/0/1
+R1(config-if)#ipv6 address fe80::1 link-local
+```
+
+* d)	Убедимся, что локальный адрес связи изменен на fe80::1.
+
+```
+R1#sh ipv6 int br
+GigabitEthernet0/0/0       [up/up]
+    FE80::1
+    2001:DB8:ACAD:A::1
+GigabitEthernet0/0/1       [up/up]
+    FE80::1
+    2001:DB8:ACAD:1::1
+Vlan1                      [administratively down/down]
+    unassigned
+```
+
+Шаг 2. Активируем IPv6-маршрутизацию на R1.
+
+* a)	В командной строке на PC-B введем команду ipconfig, чтобы получить данные IPv6-адреса, назначенного интерфейсу ПК.
+
+```
+C:\>ipconfig
+
+FastEthernet0 Connection:(default port)
+
+   Connection-specific DNS Suffix..: 
+   Link-local IPv6 Address.........: FE80::20A:F3FF:FE3E:D630
+   IPv6 Address....................: ::
+   IPv4 Address....................: 0.0.0.0
+   Subnet Mask.....................: 0.0.0.0
+   Default Gateway.................: ::
+                                     0.0.0.0
+```
+
+* b)	Активируем IPv6-маршрутизацию на R1 с помощью команды IPv6 unicast-routing.
+
+```
+R1(config)#ipv6 unicast-routing
+
+```
+
+Почему PC-B получил глобальный префикс маршрутизации и идентификатор подсети, которые вы настроили на R1?
+
+Потому что эту информацию PC-B получил в RA от R1.
+
+* c)	Теперь, когда R1 входит в группу многоадресной рассылки всех маршрутизаторов, еще раз введите команду ipconfig на PC-B. Проверьте данные IPv6-адреса.
+
+```
+C:\>ipconfig
+
+FastEthernet0 Connection:(default port)
+
+   Connection-specific DNS Suffix..: 
+   Link-local IPv6 Address.........: FE80::20A:F3FF:FE3E:D630
+   IPv6 Address....................: 2001:DB8:ACAD:A:20A:F3FF:FE3E:D630
+   IPv4 Address....................: 0.0.0.0
+   Subnet Mask.....................: 0.0.0.0
+   Default Gateway.................: FE80::1
+                                     0.0.0.0
+```
+
