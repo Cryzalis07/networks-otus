@@ -195,10 +195,6 @@ R1(config)#ipv6 unicast-routing
 
 ```
 
-Почему PC-B получил глобальный префикс маршрутизации и идентификатор подсети, которые вы настроили на R1?
-
-Потому что эту информацию PC-B получил в RA от R1.
-
 * c)	Теперь, когда R1 входит в группу многоадресной рассылки всех маршрутизаторов, еще раз введите команду ipconfig на PC-B. Проверьте данные IPv6-адреса.
 
 ```
@@ -214,4 +210,44 @@ FastEthernet0 Connection:(default port)
    Default Gateway.................: FE80::1
                                      0.0.0.0
 ```
+
+Почему PC-B получил глобальный префикс маршрутизации и идентификатор подсети, которые вы настроили на R1?
+
+Потому что эту информацию PC-B получил в RA от R1.
+
+Шаг 3. Назначим IPv6-адреса интерфейсу управления (SVI) на S1.
+
+* a)	Назначим адрес IPv6 для S1. Также назначим этому интерфейсу локальный адрес канала fe80::b.
+
+```
+S1(config)#int vlan 1
+S1(config-if)#ipv6 address 2001:db8:acad:1::b/64
+S1(config-if)#ipv6 address fe80::b link-local
+S1(config-if)#no sh
+```
+
+* b)	Проверим правильность назначения IPv6-адресов интерфейсу управления с помощью команды show ipv6 interface vlan1.
+
+```
+S1#sh ipv6 int vlan 1
+Vlan1 is up, line protocol is up
+  IPv6 is enabled, link-local address is FE80::B
+  No Virtual link-local address(es):
+  Global unicast address(es):
+    2001:DB8:ACAD:1::B, subnet is 2001:DB8:ACAD:1::/64
+  Joined group address(es):
+    FF02::1
+    FF02::1:FF00:B
+  MTU is 1500 bytes
+  ICMP error messages limited to one every 100 milliseconds
+  ICMP redirects are enabled
+  ICMP unreachables are sent
+  Output features: Check hwidb
+  ND DAD is enabled, number of DAD attempts: 1
+  ND reachable time is 30000 milliseconds
+```
+
+Шаг 4. Назначим компьютерам статические IPv6-адреса.
+
+### Часть 3. Проверка сквозного подключения
 
