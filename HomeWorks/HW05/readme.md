@@ -116,3 +116,80 @@ Approximate round trip times in milli-seconds:
 
 ### Часть 2. Настройка маршрутизатора для доступа по протоколу SSH.
 
+Шаг 1. Настроим аутентификацию устройств.
+
+*  a)	Зададим имя устройства.
+
+*  b)	Задайте домен для устройства.
+
+```
+Router#
+Router#conf t
+Router(config)#hostname R1
+R1(config)#ip domain-name test.com
+```
+
+Шаг 2. Создади ключ шифрования с указанием его длины.
+
+```
+R1(config)#crypto key gen rsa
+The name for the keys will be: R1.test.com
+Choose the size of the key modulus in the range of 360 to 4096 for your
+  General Purpose Keys. Choosing a key modulus greater than 512 may take
+  a few minutes.
+
+How many bits in the modulus [512]: 1024
+% Generating 1024 bit RSA keys, keys will be non-exportable...[OK]
+```
+
+Для повышения безопасности, обязательно включаем версию SSH 2.0.
+
+```
+ip ssh version 2
+```
+
+Шаг 3. Создадим имя пользователя в локальной базе учетных записей.
+
+```
+R1(config)#username admin secret Adm1nP@55
+```
+
+Шаг 4. Активируем протокол SSH на линиях VTY.
+
+* a)  Активируем протокол SSH на входящих линиях VTY с помощью команды transport input.
+
+* b)	Изменим способ входа в систему таким образом, чтобы использовалась проверка пользователей по локальной базе учетных записей.
+
+```
+R1(config-line)#transport input ssh
+R1(config-line)#login local
+```
+
+Шаг 5. Сохраним текущую конфигурацию в файл загрузочной конфигурации.
+
+```
+R1#copy run sta
+Destination filename [startup-config]? 
+Building configuration...
+[OK]
+```
+
+Шаг 6. Установим соединение с маршрутизатором по протоколу SSH.
+
+* a)	Запустим Командную строку с PC-A.
+
+* b)	Установим SSH-подключение к R1. 
+
+```
+C:\>ssh -l admin 192.168.1.1
+
+Password: 
+
+
+Unauthorized access is strictly prohibited.
+
+R1>
+```
+
+
+
