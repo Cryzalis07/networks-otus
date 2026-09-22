@@ -305,3 +305,40 @@ Unknown multicast blocked: disabled
 Appliance trust: none
 ```
 
+Шаг 2. Вручную настроим магистральный интерфейс F0/5 на коммутаторе S1.
+
+```
+S1(config)#int f0/5
+S1(config-if)#switchport mode trunk
+S1(config-if)#switchport trunk native vlan 1000
+S1(config-if)#switchport trunk allowed vlan 10,20,30,1000
+S1(config-if)#end
+S1#copy run sta
+Destination filename [startup-config]? 
+Building configuration...
+[OK]
+```
+
+### Часть 4. Настройка маршрутизации между сетями VLAN.
+
+Шаг 1. Настроим маршрутизатор.
+
+```
+R1(config)#int g0/0/1.10
+R1(config-subif)#encapsulation dot1Q 10
+R1(config-subif)#ip address 192.168.10.1 255.255.255.0
+R1(config-subif)#int g0/0/1.20
+R1(config-subif)#encapsulation dot1Q 20
+R1(config-subif)#ip address 192.168.20.1 255.255.255.0
+R1(config-subif)#int g0/0/1.30
+R1(config-subif)#encapsulation dot1Q 30
+R1(config-subif)#ip address 192.168.30.1 255.255.255.0
+R1(config-subif)#int G0/0/1.1000
+R1(config-subif)#encapsulation dot1Q 1000 native
+R1(config-subif)#exit
+R1(config)#int g0/0/1
+R1(config-if)#no sh
+```
+
+
+
