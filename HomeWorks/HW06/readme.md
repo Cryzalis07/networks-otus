@@ -119,6 +119,80 @@ Destination filename [startup-config]?
 Building configuration...
 [OK]
 ```
+Шаг 4. Настроим узлы ПК.
+
+### Часть 2. Создание сетей VLAN и назначение портов коммутатора.
+
+Шаг 1. Создадим сети VLAN на коммутаторах.
+
+* a.)	Создадим и назовем необходимые VLAN на каждом коммутаторе из таблицы выше.
+
+```
+S1(config)#vlan 10
+S1(config-vlan)#name Management
+S1(config-vlan)#vlan 20
+S1(config-vlan)#name Sales
+S1(config-vlan)#vlan 30
+S1(config-vlan)#name Operations
+S1(config-vlan)#vlan 999
+S1(config-vlan)#name Parking_Lot
+S1(config-vlan)#vlan 1000
+S1(config-vlan)#name Native
+```
+
+```
+S2(config)#vlan 10
+S2(config-vlan)#name Management
+S2(config-vlan)#vlan 20
+S2(config-vlan)#name Sales
+S2(config-vlan)#vlan 30
+S2(config-vlan)#name Operations
+S2(config-vlan)#vlan 999
+S2(config-vlan)#name Parking_Lot
+S2(config-vlan)#vlan 1000
+S2(config-vlan)#name Native
+```
+
+* b.)	Настроим интерфейс управления и шлюз по умолчанию на каждом коммутаторе, используя информацию об IP-адресе в таблице адресации.
+
+```
+S1(config)#int vlan 10
+S1(config-if)#ip address 192.168.10.11 255.255.255.0
+S1(config-if)#exit
+S1(config)#ip default-gateway 192.168.10.1
+``` 
+
+```
+S2(config)#int vlan 10
+S2(config-if)#ip address 192.168.10.12 255.255.255.0
+S2(config-if)#exit
+S2(config)#ip default-gateway 192.168.10.1
+```
+
+* c.)	Назначим все неиспользуемые порты коммутатора VLAN Parking_Lot, настроим их для статического режима доступа и административно деактивируем их.
+
+```
+S1(config)#int range f0/2-4,f0/7-24,g0/1-2
+S1(config-if-range)#switchport mode access
+S1(config-if-range)#switchport access vlan 999
+```
+
+```
+S2(config)#int range f0/2-17, f0/19-24, G0/1-2
+S2(config-if-range)#switchport mode access
+S2(config-if-range)#switchport access vlan 999
+```
+
+Шаг 2. Назначим сети VLAN соответствующим интерфейсам коммутатора.
+
+
+
+
+
+
+
+
+
 
 
 
