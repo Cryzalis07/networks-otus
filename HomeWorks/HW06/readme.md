@@ -69,7 +69,57 @@ R1#copy run sta
 Destination filename [startup-config]? 
 Building configuration...
 [OK]
-Router#
+R1#clock set 20:24:00 22 sep 2026
 ```
+
+Шаг 3. Настроим базовые параметры каждого коммутатора.
+
+```
+Switch>en
+Switch#conf t
+Switch(config)#hostname S1
+S1(config)#line con 0
+S1(config-line)#password cisco
+S1(config-line)#login
+S1(config-line)#line vty 0 4
+S1(config-line)#password cisco
+S1(config-line)#login
+S1(config-line)#exit
+S1(config)#service password-encryption
+S1(config)#banner motd #
+Enter TEXT message.  End with the character '#'.
+Unauthorized access is strictly prohibited.#
+S1(config)#exit
+S1#clock set 20:31:00 22 sep 2026
+S1#copy run sta
+Destination filename [startup-config]? 
+Building configuration...
+[OK]
+```
+
+```
+Switch>en
+Switch#conf t
+Switch(config)#hostname S2
+S2(config)#line con 0
+S2(config-line)#password cisco
+S2(config-line)#login
+S2(config-line)#line vty 0 4
+S2(config-line)#password cisco
+S2(config-line)#login
+S2(config-line)#exit
+S2(config)#service password-encryption
+S2(config)#banner motd #
+Enter TEXT message.  End with the character '#'.
+Unauthorized access is strictly prohibited.#
+S2(config)#exit
+S2#clock set 20:31:00 22 sep 2026
+S2#copy run sta
+Destination filename [startup-config]? 
+Building configuration...
+[OK]
+```
+
+
 
 
