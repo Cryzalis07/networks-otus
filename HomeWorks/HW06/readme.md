@@ -340,5 +340,77 @@ R1(config)#int g0/0/1
 R1(config-if)#no sh
 ```
 
+### Часть 5. Проверим, что маршрутизация между VLAN работает.
+
+Шаг 1. Выполним следующие тесты с PC-A.
+
+* a)	Отправим эхо-запрос с PC-A на шлюз по умолчанию.
+
+```
+C:\>ping 192.168.20.1
+
+Pinging 192.168.20.1 with 32 bytes of data:
+
+Reply from 192.168.20.1: bytes=32 time<1ms TTL=255
+Reply from 192.168.20.1: bytes=32 time<1ms TTL=255
+Reply from 192.168.20.1: bytes=32 time<1ms TTL=255
+Reply from 192.168.20.1: bytes=32 time<1ms TTL=255
+
+Ping statistics for 192.168.20.1:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+```
+
+* b)	Отправим эхо-запрос с PC-A на PC-B.
+
+```
+C:\>ping 192.168.30.3
+
+Pinging 192.168.30.3 with 32 bytes of data:
+
+Reply from 192.168.30.3: bytes=32 time<1ms TTL=127
+Reply from 192.168.30.3: bytes=32 time<1ms TTL=127
+Reply from 192.168.30.3: bytes=32 time=5ms TTL=127
+Reply from 192.168.30.3: bytes=32 time<1ms TTL=127
+
+Ping statistics for 192.168.30.3:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 5ms, Average = 1ms
+```
+
+* c)	Отправим команду ping с компьютера PC-A на коммутатор S2
+
+```
+C:\>ping 192.168.10.12
+
+Pinging 192.168.10.12 with 32 bytes of data:
+
+Reply from 192.168.10.12: bytes=32 time<1ms TTL=254
+Reply from 192.168.10.12: bytes=32 time<1ms TTL=254
+Reply from 192.168.10.12: bytes=32 time=1ms TTL=254
+Reply from 192.168.10.12: bytes=32 time<1ms TTL=254
+
+Ping statistics for 192.168.10.12:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 1ms, Average = 0ms
+```
+
+Шаг 2. Пройдем следующий тест с PC-B
+
+В окне командной строки на PC-B выполним команду tracert на адрес PC-A.
+
+```
+C:\>tracert 192.168.20.3
+
+Tracing route to 192.168.20.3 over a maximum of 30 hops: 
+
+  1   0 ms      0 ms      0 ms      192.168.30.1
+  2   2 ms      0 ms      0 ms      192.168.20.3
+
+Trace complete.
+```
 
 
