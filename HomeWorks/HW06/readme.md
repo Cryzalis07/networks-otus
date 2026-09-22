@@ -125,7 +125,7 @@ Building configuration...
 
 Шаг 1. Создадим сети VLAN на коммутаторах.
 
-* a.)	Создадим и назовем необходимые VLAN на каждом коммутаторе из таблицы выше.
+* a)	Создадим и назовем необходимые VLAN на каждом коммутаторе из таблицы выше.
 
 ```
 S1(config)#vlan 10
@@ -153,7 +153,7 @@ S2(config-vlan)#vlan 1000
 S2(config-vlan)#name Native
 ```
 
-* b.)	Настроим интерфейс управления и шлюз по умолчанию на каждом коммутаторе, используя информацию об IP-адресе в таблице адресации.
+* b)	Настроим интерфейс управления и шлюз по умолчанию на каждом коммутаторе, используя информацию об IP-адресе в таблице адресации.
 
 ```
 S1(config)#int vlan 10
@@ -169,7 +169,7 @@ S2(config-if)#exit
 S2(config)#ip default-gateway 192.168.10.1
 ```
 
-* c.)	Назначим все неиспользуемые порты коммутатора VLAN Parking_Lot, настроим их для статического режима доступа и административно деактивируем их.
+* c)	Назначим все неиспользуемые порты коммутатора VLAN Parking_Lot, настроим их для статического режима доступа и административно деактивируем их.
 
 ```
 S1(config)#int range f0/2-4,f0/7-24,g0/1-2
@@ -185,15 +185,123 @@ S2(config-if-range)#switchport access vlan 999
 
 Шаг 2. Назначим сети VLAN соответствующим интерфейсам коммутатора.
 
+* a)	Назначим используемые порты соответствующей VLAN (указанной в таблице VLAN выше) и настроим их для режима статического доступа.
 
+```
+S1(config)#int f0/6
+S1(config-if)#switchport mode access
+S1(config-if)#switchport access vlan 20
+```
 
+```
+S2(config)#int f0/18
+S2(config-if)#switchport mode access
+S2(config-if)#switchport access vlan 30
+```
 
+* b)	Убедимся, что VLAN назначены на правильные интерфейсы.
 
+```
+S1#sh vlan br
 
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Fa0/1, Fa0/5
+10   Management                       active    
+20   Sales                            active    Fa0/6
+30   Operations                       active    
+999  Parking_Lot                      active    Fa0/2, Fa0/3, Fa0/4, Fa0/7
+                                                Fa0/8, Fa0/9, Fa0/10, Fa0/11
+                                                Fa0/12, Fa0/13, Fa0/14, Fa0/15
+                                                Fa0/16, Fa0/17, Fa0/18, Fa0/19
+                                                Fa0/20, Fa0/21, Fa0/22, Fa0/23
+                                                Fa0/24, Gig0/1, Gig0/2
+```
 
+```
+S2#sh vlan br
 
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Fa0/1
+10   Management                       active    
+20   Sales                            active    
+30   Operations                       active    Fa0/18
+999  Parking_Lot                      active    Fa0/2, Fa0/3, Fa0/4, Fa0/5
+                                                Fa0/6, Fa0/7, Fa0/8, Fa0/9
+                                                Fa0/10, Fa0/11, Fa0/12, Fa0/13
+                                                Fa0/14, Fa0/15, Fa0/16, Fa0/17
+                                                Fa0/19, Fa0/20, Fa0/21, Fa0/22
+                                                Fa0/23, Fa0/24, Gig0/1, Gig0/2
+```
 
+### Часть 3. Настройка транка 802.1Q между коммутаторами.
 
+Шаг 1. Вручную настроим магистральный интерфейс F0/1 на коммутаторах S1 и S2.
 
+```
+S1(config)#int f0/1
+S1(config-if)#switchport mode trunk
+S1(config-if)#switchport trunk native vlan 1000
+S1(config-if)#switchport trunk allowed vlan 10,20,30,1000
+S1#sh interfaces f0/1 switchport 
+Name: Fa0/1
+Switchport: Enabled
+Administrative Mode: trunk
+Operational Mode: trunk
+Administrative Trunking Encapsulation: dot1q
+Operational Trunking Encapsulation: dot1q
+Negotiation of Trunking: On
+Access Mode VLAN: 1 (default)
+Trunking Native Mode VLAN: 1000 (Native)
+Voice VLAN: none
+Administrative private-vlan host-association: none
+Administrative private-vlan mapping: none
+Administrative private-vlan trunk native VLAN: none
+Administrative private-vlan trunk encapsulation: dot1q
+Administrative private-vlan trunk normal VLANs: none
+Administrative private-vlan trunk private VLANs: none
+Operational private-vlan: none
+Trunking VLANs Enabled: 10,20,30,1000
+Pruning VLANs Enabled: 2-1001
+Capture Mode Disabled
+Capture VLANs Allowed: ALL
+Protected: false
+Unknown unicast blocked: disabled
+Unknown multicast blocked: disabled
+Appliance trust: none
+```
 
+```
+S2(config)#int f0/1
+S2(config-if)#switchport mode trunk
+S2(config-if)#switchport trunk native vlan 1000
+S2(config-if)#switchport trunk allowed vlan 10,20,30,1000
+S2#sh int f0/1 switchport 
+Name: Fa0/1
+Switchport: Enabled
+Administrative Mode: trunk
+Operational Mode: trunk
+Administrative Trunking Encapsulation: dot1q
+Operational Trunking Encapsulation: dot1q
+Negotiation of Trunking: On
+Access Mode VLAN: 1 (default)
+Trunking Native Mode VLAN: 1000 (Native)
+Voice VLAN: none
+Administrative private-vlan host-association: none
+Administrative private-vlan mapping: none
+Administrative private-vlan trunk native VLAN: none
+Administrative private-vlan trunk encapsulation: dot1q
+Administrative private-vlan trunk normal VLANs: none
+Administrative private-vlan trunk private VLANs: none
+Operational private-vlan: none
+Trunking VLANs Enabled: 10,20,30,1000
+Pruning VLANs Enabled: 2-1001
+Capture Mode Disabled
+Capture VLANs Allowed: ALL
+Protected: false
+Unknown unicast blocked: disabled
+Unknown multicast blocked: disabled
+Appliance trust: none
+```
 
