@@ -48,6 +48,28 @@
 
 Шаг 2. Настроим базовые параметры для маршрутизатора.
 
-
+```
+Router>en
+Router#conf t
+Router(config)#hostname R1
+R1(config)#no ip domain-lookup 
+R1(config)#enable secret class
+R1(config)#line con 0
+R1(config-line)#password cisco
+R1(config-line)#login
+R1(config)#line vty 0 4
+R1(config-line)#password cisco
+R1(config-line)#login
+R1(config-line)#exit
+R1(config)#service password-encryption
+R1(config)#banner motd #
+Enter TEXT message.  End with the character '#'.
+Unauthorized access is strictly prohibited.#
+R1#copy run sta
+Destination filename [startup-config]? 
+Building configuration...
+[OK]
+Router#
+```
 
 
