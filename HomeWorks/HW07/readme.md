@@ -47,4 +47,80 @@
   
 * h)	Скопируйте текущую конфигурацию в файл загрузочной конфигурации.
 
-  
+```
+Switch>en
+Switch#conf t
+Switch(config)#no ip domain-lookup
+Switch(config)#hostname S1
+S1(config)#enable secret class
+S1(config)#line con 0
+S1(config-line)#password cisco
+S1(config-line)#login
+S1(config-line)#line vty 0 4
+S1(config-line)#password cisco
+S1(config-line)#login
+S1(config-line)#line con 0
+S1(config-line)#logging synchronous 
+S1(config-line)#exit
+S1(config)#service password-encryption 
+S1(config)#banner motd #Authorized Access Only!#
+S1(config)#int vlan 1
+S1(config-if)#ip address 192.168.1.1 255.255.255.0
+S1(config)#end
+S1#copy run sta
+Destination filename [startup-config]? 
+Building configuration...
+[OK]
+```
+
+```
+Switch>en
+Switch#conf t
+Switch(config)#no ip domain-lookup
+Switch(config)#hostname S2
+S2(config)#enable secret class
+S2(config-line)#line con 0
+S2(config-line)#password cisco
+S2(config-line)#login
+S2(config-line)#logging synchronous 
+S2(config-line)#line vty 0 4
+S2(config-line)#passwor cisco
+S2(config-line)#login
+S2(config-line)#exit
+S2(config)#service password-encryption 
+S2(config)#banner motd #Authorized Access Only!#
+S2(config)#int vlan 1
+S2(config-if)#ip address 192.168.1.2 255.255.255.0
+S2(config-if)#end
+S2#copy run sta
+Destination filename [startup-config]? 
+Building configuration...
+[OK]
+```
+
+```
+Switch>en
+Switch#conf t
+Switch(config)#no ip domain-lookup
+Switch(config)#hostname S3
+S3(config)#enable secret class
+S3(config)#line con 0
+S3(config-line)#password cisco
+S3(config-line)#login
+S3(config-line)#logging synchronous
+S3(config-line)#line vty 0 4
+S3(config-line)#passwor cisco
+S3(config-line)#login
+S3(config-line)#exit
+S3(config)#service password-encryption 
+S3(config)#banner motd #Authorized Access Only!#
+S3(config)#int vlan 1
+S3(config-if)#ip address 192.168.1.3 255.255.255.0
+S3(config-if)#end
+S3#copy run sta
+Destination filename [startup-config]? 
+Building configuration...
+[OK]
+```
+
+
