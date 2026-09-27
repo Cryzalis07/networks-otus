@@ -66,6 +66,7 @@ S1(config)#service password-encryption
 S1(config)#banner motd #Authorized Access Only!#
 S1(config)#int vlan 1
 S1(config-if)#ip address 192.168.1.1 255.255.255.0
+S1(config-if)#no sh
 S1(config)#end
 S1#copy run sta
 Destination filename [startup-config]? 
@@ -91,6 +92,7 @@ S2(config)#service password-encryption
 S2(config)#banner motd #Authorized Access Only!#
 S2(config)#int vlan 1
 S2(config-if)#ip address 192.168.1.2 255.255.255.0
+S2(config-if)#no sh
 S2(config-if)#end
 S2#copy run sta
 Destination filename [startup-config]? 
@@ -116,6 +118,7 @@ S3(config)#service password-encryption
 S3(config)#banner motd #Authorized Access Only!#
 S3(config)#int vlan 1
 S3(config-if)#ip address 192.168.1.3 255.255.255.0
+S3(config-if)#no sh
 S3(config-if)#end
 S3#copy run sta
 Destination filename [startup-config]? 
@@ -123,4 +126,32 @@ Building configuration...
 [OK]
 ```
 
+Шаг 4:	Проверьте связь.
+
+```
+S1#ping 192.168.1.2
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.1.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 0/0/0 ms
+
+S1#ping 192.168.1.3
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.1.3, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 0/0/0 ms
+```
+
+```
+S2#ping 192.168.1.3
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.1.3, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 0/0/0 ms
+```
+
+### Часть 2. Выбор корневого моста.
 
