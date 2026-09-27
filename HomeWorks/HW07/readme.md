@@ -155,3 +155,153 @@ Success rate is 100 percent (5/5), round-trip min/avg/max = 0/0/0 ms
 
 ### Часть 2. Выбор корневого моста.
 
+Шаг 1:	Отключите все порты на коммутаторах.
+
+```
+S1(config)#int range f0/1 - 24, g0/1 - 2
+S1(config-if-range)#shutdown 
+```
+
+```
+S2(config)#int range f0/1 - 24, g0/1 - 2
+S2(config-if-range)#shutdown
+```
+
+```
+S3(config)#int range f0/1 - 24, g0/1 - 2
+S3(config-if-range)#shutdown 
+```
+
+Шаг 2:	Настройте подключенные порты в качестве транковых.
+
+```
+S1(config)#int f0/1
+S1(config-if)#switchport mode trunk
+S1(config-if)#switchport trunk native vlan 1
+S1(config)#int f0/2
+S1(config-if)#switchport mode trunk
+S1(config-if)#switchport trunk native vlan 1
+S1(config)#int f0/3
+S1(config-if)#switchport mode trunk
+S1(config-if)#switchport trunk native vlan 1
+S1(config-if)#int f0/4
+S1(config-if)#switchport mode trunk
+S1(config-if)#switchport trunk native vlan 1
+```
+
+```
+S2(config)#int f0/1
+S2(config-if)#switchport mode trunk 
+S2(config-if)#switchport trunk native vlan 1
+S2(config-if)#int f0/2
+S2(config-if)#switchport mode trunk 
+S2(config-if)#switchport trunk native vlan 1
+S2(config-if)#int f0/3
+S2(config-if)#switchport mode trunk 
+S2(config-if)#switchport trunk native vlan 1
+S2(config-if)#int f0/4
+S2(config-if)#switchport mode trunk 
+S2(config-if)#switchport trunk native vlan 1
+```
+
+```
+S3(config)#int f0/1
+S3(config-if)#switchport mode trunk 
+S3(config-if)#switchport trunk native vlan 1
+S3(config-if)#int f0/2
+S3(config-if)#switchport mode trunk 
+S3(config-if)#switchport trunk native vlan 1
+S3(config-if)#int f0/3
+S3(config-if)#switchport mode trunk 
+S3(config-if)#switchport trunk native vlan 1
+S3(config-if)#int f0/4
+S3(config-if)#switchport mode trunk 
+S3(config-if)#switchport trunk native vlan 1
+```
+
+Шаг 3:	Включите порты F0/2 и F0/4 на всех коммутаторах.
+
+```
+S1(config)#int f0/2
+S1(config-if)#no sh
+S1(config-if)#int f0/4
+S1(config-if)#no sh
+```
+
+```
+S2(config-if)#int f0/2
+S2(config-if)#no sh
+S2(config-if)#int f0/4
+S2(config-if)#no sh
+```
+
+```
+S3(config-if)#int f0/2
+S3(config-if)#no sh
+S3(config-if)#int f0/4
+S3(config-if)#no sh
+```
+
+Шаг 4:	Отобразите данные протокола spanning-tree.
+
+```
+S1#sh spanning-tree 
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     0001.9729.0709
+             Cost        19
+             Port        4(FastEthernet0/4)
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     0090.0C3E.82BB
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  20
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------------------------------
+Fa0/2            Altn BLK 19        128.2    P2p
+Fa0/4            Root FWD 19        128.4    P2p
+```
+
+```
+S2#sh spanning-tree 
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     0001.9729.0709
+             Cost        19
+             Port        4(FastEthernet0/4)
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     0001.9765.60E6
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  20
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------------------------------
+Fa0/4            Root FWD 19        128.4    P2p
+Fa0/2            Desg FWD 19        128.2    P2p
+```
+
+```
+S3#sh spanning-tree 
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     0001.9729.0709
+             This bridge is the root
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     0001.9729.0709
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  20
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------------------------------
+Fa0/2            Desg FWD 19        128.2    P2p
+Fa0/4            Desg FWD 19        128.4    P2p
+```
