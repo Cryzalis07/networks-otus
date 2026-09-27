@@ -323,4 +323,223 @@ Fa0/4            Desg FWD 19        128.4    P2p
 
 ### Часть 3:	Наблюдение за процессом выбора протоколом STP порта, исходя из стоимости портов.
 
+Шаг 1:	Определите коммутатор с заблокированным портом.
 
+```
+S1#sh spanning-tree 
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     0001.9729.0709
+             Cost        19
+             Port        4(FastEthernet0/4)
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     0090.0C3E.82BB
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  20
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------------------------------
+Fa0/2            Altn BLK 19        128.2    P2p
+Fa0/4            Root FWD 19        128.4    P2p
+```
+
+```
+S2#sh spanning-tree 
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     0001.9729.0709
+             Cost        19
+             Port        4(FastEthernet0/4)
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     0001.9765.60E6
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  20
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------------------------------
+Fa0/4            Root FWD 19        128.4    P2p
+Fa0/2            Desg FWD 19        128.2    P2p
+```
+
+Шаг 2:	Измените стоимость порта.
+
+```
+S1(config)#int f0/4
+S1(config-if)#spanning-tree vlan 1 cost 18
+```
+
+Шаг 3:	Просмотрите изменения протокола spanning-tree.
+
+```
+S1#sh spanning-tree 
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     0001.9729.0709
+             Cost        18
+             Port        4(FastEthernet0/4)
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     0090.0C3E.82BB
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  20
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------------------------------
+Fa0/2            Desg FWD 19        128.2    P2p
+Fa0/4            Root FWD 18        128.4    P2p
+```
+
+```
+S2#sh spanning-tree 
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     0001.9729.0709
+             Cost        19
+             Port        4(FastEthernet0/4)
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     0001.9765.60E6
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  20
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------------------------------
+Fa0/4            Root FWD 19        128.4    P2p
+Fa0/2            Altn BLK 19        128.2    P2p
+```
+
+Почему протокол spanning-tree заменяет ранее заблокированный порт на назначенный порт и блокирует порт, который был назначенным портом на другом коммутаторе? - 
+*Изменение происходит из-за снижения стоимости порта*
+
+Шаг 4:	Удалите изменения стоимости порта.
+
+```
+S1(config)#int f0/4
+S1(config-if)#no spanning-tree vlan 1 cost 18
+```
+
+```
+S1#sh spanning-tree 
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     0001.9729.0709
+             Cost        19
+             Port        4(FastEthernet0/4)
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     0090.0C3E.82BB
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  20
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------------------------------
+Fa0/2            Altn BLK 19        128.2    P2p
+Fa0/4            Root FWD 19        128.4    P2p
+```
+
+```
+S2#sh spanning-tree 
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     0001.9729.0709
+             Cost        19
+             Port        4(FastEthernet0/4)
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     0001.9765.60E6
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  20
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------------------------------
+Fa0/4            Root FWD 19        128.4    P2p
+Fa0/2            Desg FWD 19        128.2    P2p
+```
+
+### Часть 4:	Наблюдение за процессом выбора протоколом STP порта, исходя из приоритета портов.
+
+```
+S1#sh spanning-tree 
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     0001.9729.0709
+             Cost        19
+             Port        3(FastEthernet0/3)
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     0090.0C3E.82BB
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  20
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------------------------------
+Fa0/3            Root FWD 19        128.3    P2p
+Fa0/1            Altn BLK 19        128.1    P2p
+Fa0/2            Altn BLK 19        128.2    P2p
+Fa0/4            Altn BLK 19        128.4    P2p
+```
+
+```
+S2#sh spanning-tree 
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     0001.9729.0709
+             Cost        19
+             Port        3(FastEthernet0/3)
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     0001.9765.60E6
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  20
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------------------------------
+Fa0/4            Altn BLK 19        128.4    P2p
+Fa0/2            Desg FWD 19        128.2    P2p
+Fa0/3            Root FWD 19        128.3    P2p
+Fa0/1            Desg FWD 19        128.1    P2p
+```
+
+```
+S3#sh spanning-tree 
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     0001.9729.0709
+             This bridge is the root
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     0001.9729.0709
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  20
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------------------------------
+Fa0/1            Desg FWD 19        128.1    P2p
+Fa0/3            Desg FWD 19        128.3    P2p
+Fa0/2            Desg FWD 19        128.2    P2p
+Fa0/4            Desg FWD 19        128.4    P2p
+```
+
+Какой порт выбран протоколом STP в качестве порта корневого моста на каждом коммутаторе некорневого моста? - *На S1 - Fa0/3, на S2 - Fa0/3*
+
+Почему протокол STP выбрал эти порты в качестве портов корневого моста на этих коммутаторах? - 
