@@ -48,7 +48,57 @@
 Шаг 3.	Произвести базовую настройку маршрутизаторов.
 
 ```
-Switch>en
-
+Router>en
+Router#conf t
+Router(config)#
+Router(config)#no ip domain-lookup
+Router(config)#hostname R1
+R1(config)#enable secret class
+R1(config)#line con 0 
+R1(config-line)#password cisco
+R1(config-line)#login
+R1(config-line)#line vty 0 4
+R1(config-line)#password cisco
+R1(config-line)#login
+R1(config-line)#exit
+R1(config)#service password-encryption
+R1(config)#banner motd #Authorized Access Only!#
+R1(config)#^Z
+R1#copy running-config startup-config 
+Destination filename [startup-config]? 
+Building configuration...
+[OK]
+R1#clock set 21:33:00 22 oct 2026
 ```
 
+```
+Router>en
+Router#conf t
+Router(config)#
+Router(config)#no ip domain-lookup
+Router(config)#hostname R2
+R2(config)#enable secret class
+R2(config)#line con 0 
+R2(config-line)#password cisco
+R2(config-line)#login
+R2(config-line)#line vty 0 4
+R2(config-line)#password cisco
+R2(config-line)#login
+R2(config-line)#exit
+R2(config)#service password-encryption
+R2(config)#banner motd #Authorized Access Only!#
+R2(config)#^Z
+R2#copy running-config startup-config 
+Destination filename [startup-config]? 
+Building configuration...
+[OK]
+R2#clock set 21:35:00 22 oct 2026
+```
+
+Шаг 4.	Настройка маршрутизации между сетями VLAN на маршрутизаторе R1.
+
+```
+R1(config)#int g0/0/1
+R1(config-if)#no sh
+
+```
