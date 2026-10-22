@@ -33,9 +33,9 @@
 
 ### Часть 1. Создание сети и настройка основных параметров устройства.
 
-### Часть 2. Настройка и проверка двух серверов DHCPv4 на R1
+### Часть 2. Настройка и проверка двух серверов DHCPv4 на R1.
 
-### Часть 3. Настройка и проверка DHCP-ретрансляции на R2
+### Часть 3. Настройка и проверка DHCP-ретрансляции на R2.
 
 ## Решение:
 
@@ -272,4 +272,165 @@ Port        Vlans in spanning tree forwarding state and not pruned
 Fa0/5       100,200,1000
 ```
 
+### Часть 2. Настройка и проверка двух серверов DHCPv4 на R1.
+
+Шаг 1.	Настроим R1 с пулами DHCPv4 для двух поддерживаемых подсетей. Ниже приведен только пул DHCP для подсети A.
+
+```
+R1(config)#ip dhcp excluded-address 192.168.1.1 192.168.1.5
+R1(config)#ip dhcp pool R1_Client_LAN
+R1(dhcp-config)#network 192.168.1.0 255.255.255.192
+R1(dhcp-config)#default-router 192.168.1.1
+R1(dhcp-config)#domain-name CCNA-lab.com
+R1(config)#ip dhcp excluded-address 192.168.1.97 192.168.1.101
+R1(config)#ip dhcp pool R2_Client_LAN
+R1(dhcp-config)#network 192.168.1.96 255.255.255.240
+R1(dhcp-config)#default-router 192.168.1.97
+R1(dhcp-config)#domain-name CCNA-lab.com
+```
+
+Шаг 2.	Сохраним конфигурацию.
+
+```
+R1#copy run sta
+Destination filename [startup-config]? 
+Building configuration...
+[OK]
+```
+
+Шаг 3.	Проверка конфигурации сервера DHCPv4.
+
+```
+R1#show ip dhcp pool
+
+Pool R1_Client_LAN :
+ Utilization mark (high/low)    : 100 / 0
+ Subnet size (first/next)       : 0 / 0 
+ Total addresses                : 62
+ Leased addresses               : 1
+ Excluded addresses             : 2
+ Pending event                  : none
+
+ 1 subnet is currently in the pool
+ Current index        IP address range                    Leased/Excluded/Total
+ 192.168.1.1          192.168.1.1      - 192.168.1.62      1    / 2     / 62
+
+Pool R2_Client_LAN :
+ Utilization mark (high/low)    : 100 / 0
+ Subnet size (first/next)       : 0 / 0 
+ Total addresses                : 14
+ Leased addresses               : 0
+ Excluded addresses             : 2
+ Pending event                  : none
+
+ 1 subnet is currently in the pool
+ Current index        IP address range                    Leased/Excluded/Total
+ 192.168.1.97         192.168.1.97     - 192.168.1.110     0    / 2     / 14
+R1#show ip dhcp binding
+IP address       Client-ID/              Lease expiration        Type
+                 Hardware address
+192.168.1.6      0005.5E51.C996           --                     Automatic
+```
+
+Шаг 4.	Попытка получить IP-адрес от DHCP на PC-A.
+
+```
+C:\>ipconfig /all
+
+FastEthernet0 Connection:(default port)
+
+   Connection-specific DNS Suffix..: CCNA-lab.com
+   Physical Address................: 0005.5E51.C996
+   Link-local IPv6 Address.........: FE80::205:5EFF:FE51:C996
+   IPv6 Address....................: ::
+   IPv4 Address....................: 192.168.1.6
+   Subnet Mask.....................: 255.255.255.192
+   Default Gateway.................: ::
+                                     192.168.1.1
+   DHCP Servers....................: 192.168.1.1
+   DHCPv6 IAID.....................: 
+   DHCPv6 Client DUID..............: 00-01-00-01-30-06-5C-AB-00-05-5E-51-C9-96
+   DNS Servers.....................: ::
+                                     0.0.0.0
+
+C:\>ping 192.168.1.97
+
+Pinging 192.168.1.97 with 32 bytes of data:
+
+Request timed out.
+Reply from 192.168.1.97: bytes=32 time<1ms TTL=254
+Reply from 192.168.1.97: bytes=32 time<1ms TTL=254
+Reply from 192.168.1.97: bytes=32 time<1ms TTL=254
+
+Ping statistics for 192.168.1.97:
+    Packets: Sent = 4, Received = 3, Lost = 1 (25% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+```
+
+### Часть 3. Настройка и проверка DHCP-ретрансляции на R2.
+
+Шаг 1.	Настройка R2 в качестве агента DHCP-ретрансляции для локальной сети на G0/0/1
+
+```
+R2(config)#int g0/0/1
+R2(config-if)#ip helper-address 10.0.0.1
+R2#copy run sta
+Destination filename [startup-config]? 
+Building configuration...
+[OK]
+```
+
+Шаг 2.	Попытка получить IP-адрес от DHCP на PC-B.
+
+```
+C:\>ipconfig /renew
+
+   IP Address......................: 192.168.1.102
+   Subnet Mask.....................: 255.255.255.240
+   Default Gateway.................: 192.168.1.97
+   DNS Server......................: 0.0.0.0
+
+C:\>ipconfig /all
+
+FastEthernet0 Connection:(default port)
+
+   Connection-specific DNS Suffix..: CCNA-lab.com
+   Physical Address................: 000A.F372.5D64
+   Link-local IPv6 Address.........: FE80::20A:F3FF:FE72:5D64
+   IPv6 Address....................: ::
+   IPv4 Address....................: 192.168.1.102
+   Subnet Mask.....................: 255.255.255.240
+   Default Gateway.................: ::
+                                     192.168.1.97
+   DHCP Servers....................: 10.0.0.1
+   DHCPv6 IAID.....................: 
+   DHCPv6 Client DUID..............: 00-01-00-01-17-ED-30-A9-00-0A-F3-72-5D-64
+   DNS Servers.....................: ::
+                                     0.0.0.0
+
+C:\>ping 192.168.1.1
+
+Pinging 192.168.1.1 with 32 bytes of data:
+
+Reply from 192.168.1.1: bytes=32 time<1ms TTL=254
+Reply from 192.168.1.1: bytes=32 time<1ms TTL=254
+Reply from 192.168.1.1: bytes=32 time<1ms TTL=254
+Reply from 192.168.1.1: bytes=32 time<1ms TTL=254
+
+Ping statistics for 192.168.1.1:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+```
+
+```
+R1#show ip dhcp binding
+IP address       Client-ID/              Lease expiration        Type
+                 Hardware address
+192.168.1.6      0005.5E51.C996           --                     Automatic
+192.168.1.102    000A.F372.5D64           --                     Automatic
+
+
+```
 
