@@ -295,22 +295,33 @@ FastEthernet0 Connection:(default port)
                                      0.0.0.0
 ```
 
-b.) Настройте R2 в качестве агента DHCP-ретрансляции в CISCO Packet Tracer нельзя.
+b.) Настроить R2 в качестве агента DHCP-ретрансляции в CISCO Packet Tracer нельзя.
 
-c.) Проверка доступность PC-A с PC-B.
+Настроим DHCP на R2
 
 ```
-C:\>ping 2001:DB8:ACAD:1:205:5EFF:FE51:C996
+R2(config)#ipv6 dhcp pool R2-STATEFUL
+R2(config-dhcpv6)#address prefix 2001:db8:acad:3:aaa::/80
+R2(config-dhcpv6)#dns-server 2001:db8:acad::254
+R2(config-dhcpv6)#domain-name STATEFUL.com
+R2(config-dhcpv6)#interface g0/0/1
+R2(config-if)#ipv6 dhcp server R2-STATEFUL
+```
 
-Pinging 2001:DB8:ACAD:1:205:5EFF:FE51:C996 with 32 bytes of data:
+c.) Проверка доступность PC-B с PC-A.
 
-Reply from 2001:DB8:ACAD:1:205:5EFF:FE51:C996: bytes=32 time=14ms TTL=126
-Reply from 2001:DB8:ACAD:1:205:5EFF:FE51:C996: bytes=32 time=1ms TTL=126
-Reply from 2001:DB8:ACAD:1:205:5EFF:FE51:C996: bytes=32 time<1ms TTL=126
-Reply from 2001:DB8:ACAD:1:205:5EFF:FE51:C996: bytes=32 time=12ms TTL=126
+```
+C:\>ping 2001:DB8:ACAD:3:AAA:6346:398F:C9
 
-Ping statistics for 2001:DB8:ACAD:1:205:5EFF:FE51:C996:
+Pinging 2001:DB8:ACAD:3:AAA:6346:398F:C9 with 32 bytes of data:
+
+Reply from 2001:DB8:ACAD:3:AAA:6346:398F:C9: bytes=32 time<1ms TTL=126
+Reply from 2001:DB8:ACAD:3:AAA:6346:398F:C9: bytes=32 time<1ms TTL=126
+Reply from 2001:DB8:ACAD:3:AAA:6346:398F:C9: bytes=32 time<1ms TTL=126
+Reply from 2001:DB8:ACAD:3:AAA:6346:398F:C9: bytes=32 time<1ms TTL=126
+
+Ping statistics for 2001:DB8:ACAD:3:AAA:6346:398F:C9:
     Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
 Approximate round trip times in milli-seconds:
-    Minimum = 0ms, Maximum = 14ms, Average = 6ms
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
 ```
