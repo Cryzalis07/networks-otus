@@ -174,6 +174,123 @@ Building configuration...
 
 ### Часть 2. Проверка назначения адреса SLAAC от R1.
 
+```
+C:\>ipconfig
 
+FastEthernet0 Connection:(default port)
 
+   Connection-specific DNS Suffix..: 
+   Link-local IPv6 Address.........: FE80::205:5EFF:FE51:C996
+   IPv6 Address....................: 2001:DB8:ACAD:1:205:5EFF:FE51:C996
+   IPv4 Address....................: 0.0.0.0
+   Subnet Mask.....................: 0.0.0.0
+   Default Gateway.................: FE80::1
+                                     0.0.0.0
+```
 
+### Часть 3. Настройка и проверка сервера DHCPv6 без гражданства на R1.
+
+a.) Более подробно изучите конфигурацию PC-A.
+
+```
+C:\>ipconfig /all
+
+FastEthernet0 Connection:(default port)
+
+   Connection-specific DNS Suffix..: 
+   Physical Address................: 0005.5E51.C996
+   Link-local IPv6 Address.........: FE80::205:5EFF:FE51:C996
+   IPv6 Address....................: 2001:DB8:ACAD:1:205:5EFF:FE51:C996
+   IPv4 Address....................: 0.0.0.0
+   Subnet Mask.....................: 0.0.0.0
+   Default Gateway.................: FE80::1
+                                     0.0.0.0
+   DHCP Servers....................: 0.0.0.0
+   DHCPv6 IAID.....................: 
+   DHCPv6 Client DUID..............: 00-01-00-01-30-06-5C-AB-00-05-5E-51-C9-96
+   DNS Servers.....................: ::
+                                     0.0.0.0
+```
+
+b.) Настройте R1 для предоставления DHCPv6 без состояния для PC-A.
+
+```
+R1(config)#ipv6 dhcp pool R1-STATELESS
+R1(config-dhcpv6)#dns-server 2001:db8:acad::1
+R1(config-dhcpv6)#domain-name STATELESS.com
+R1(config-dhcpv6)#interface g0/0/1
+R1(config-if)#ipv6 nd other-config-flag
+R1(config-if)#ipv6 dhcp server R1-STATELESS
+R1#copy run sta
+Destination filename [startup-config]? 
+Building configuration...
+[OK]
+```
+
+```
+C:\>ipconfig /all
+
+FastEthernet0 Connection:(default port)
+
+   Connection-specific DNS Suffix..: STATELESS.com 
+   Physical Address................: 0005.5E51.C996
+   Link-local IPv6 Address.........: FE80::205:5EFF:FE51:C996
+   IPv6 Address....................: 2001:DB8:ACAD:1:205:5EFF:FE51:C996
+   IPv4 Address....................: 0.0.0.0
+   Subnet Mask.....................: 0.0.0.0
+   Default Gateway.................: FE80::1
+                                     0.0.0.0
+   DHCP Servers....................: 0.0.0.0
+   DHCPv6 IAID.....................: 1395505355
+   DHCPv6 Client DUID..............: 00-01-00-01-30-06-5C-AB-00-05-5E-51-C9-96
+   DNS Servers.....................: 2001:DB8:ACAD::1
+                                     0.0.0.0
+C:\>ping 2001:db8:acad:3::1
+
+Pinging 2001:db8:acad:3::1 with 32 bytes of data:
+
+Reply from 2001:DB8:ACAD:3::1: bytes=32 time=3ms TTL=254
+Reply from 2001:DB8:ACAD:3::1: bytes=32 time=10ms TTL=254
+Reply from 2001:DB8:ACAD:3::1: bytes=32 time<1ms TTL=254
+Reply from 2001:DB8:ACAD:3::1: bytes=32 time<1ms TTL=254
+
+Ping statistics for 2001:DB8:ACAD:3::1:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 10ms, Average = 3ms
+```
+
+### Часть 4. Настройка и проверка состояния DHCPv6 сервера на R1.
+
+```
+R1(config)#ipv6 dhcp pool R2-STATEFUL
+R1(config-dhcpv6)#address prefix 2001:db8:acad:3:aaa::/80
+R1(config-dhcpv6)#dns-server 2001:db8:acad::254
+R1(config-dhcpv6)#domain-name STATEFUL.com
+R1(config-dhcpv6)#interface g0/0/0
+R1(config-if)#ipv6 dhcp server R2-STATEFUL
+```
+
+### Часть 5. Настройка и проверка DHCPv6 Relay на R2.
+
+a.)* Включите PC-B и проверьте адрес SLAAC, который он генерирует.
+
+```
+C:\>ipconfig /all
+
+FastEthernet0 Connection:(default port)
+
+   Connection-specific DNS Suffix..: 
+   Physical Address................: 000A.F372.5D64
+   Link-local IPv6 Address.........: FE80::20A:F3FF:FE72:5D64
+   IPv6 Address....................: 2001:DB8:ACAD:3:20A:F3FF:FE72:5D64
+   IPv4 Address....................: 0.0.0.0
+   Subnet Mask.....................: 0.0.0.0
+   Default Gateway.................: FE80::1
+                                     0.0.0.0
+   DHCP Servers....................: 0.0.0.0
+   DHCPv6 IAID.....................: 
+   DHCPv6 Client DUID..............: 00-01-00-01-17-ED-30-A9-00-0A-F3-72-5D-64
+   DNS Servers.....................: ::
+                                     0.0.0.0
+```
