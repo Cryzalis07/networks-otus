@@ -34,4 +34,31 @@
 
 ### Часть 1. Создание сети и настройка основных параметров устройства.
 
-Шаг 1. Создайте сеть согласно топологии.
+a.) Создайте сеть согласно топологии.
+
+b.) Настройте базовые параметры каждого коммутатора.
+
+```
+Switch>en
+Switch#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Switch(config)#hos
+Switch(config)#hostname S1
+S1(config)#no ip domain-l
+S1(config)#no ip domain-lookup 
+S1(config)#enable secr
+S1(config)#enable secret class
+S1(config)#line con 0
+S1(config-line)#pass
+S1(config-line)#password cisco
+S1(config-line)#login
+S1(config-line)#line vty 0 4
+S1(config-line)#pas
+S1(config-line)#password cisco
+S1(config-line)#login
+S1(config-line)#exit
+S1(config)#ser
+S1(config)#service pas
+S1(config)#service password-encryption 
+S1(config)#banner motd #Authorized Access Only!#
+```
