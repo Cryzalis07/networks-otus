@@ -273,7 +273,7 @@ R1(config-if)#ipv6 dhcp server R2-STATEFUL
 
 ### Часть 5. Настройка и проверка DHCPv6 Relay на R2.
 
-a.)* Включите PC-B и проверьте адрес SLAAC, который он генерирует.
+a.) Включите PC-B и проверьте адрес SLAAC, который он генерирует.
 
 ```
 C:\>ipconfig /all
@@ -293,4 +293,24 @@ FastEthernet0 Connection:(default port)
    DHCPv6 Client DUID..............: 00-01-00-01-17-ED-30-A9-00-0A-F3-72-5D-64
    DNS Servers.....................: ::
                                      0.0.0.0
+```
+
+b.) Настройте R2 в качестве агента DHCP-ретрансляции в CISCO Packet Tracer нельзя.
+
+c.) Проверка доступность PC-A с PC-B.
+
+```
+C:\>ping 2001:DB8:ACAD:1:205:5EFF:FE51:C996
+
+Pinging 2001:DB8:ACAD:1:205:5EFF:FE51:C996 with 32 bytes of data:
+
+Reply from 2001:DB8:ACAD:1:205:5EFF:FE51:C996: bytes=32 time=14ms TTL=126
+Reply from 2001:DB8:ACAD:1:205:5EFF:FE51:C996: bytes=32 time=1ms TTL=126
+Reply from 2001:DB8:ACAD:1:205:5EFF:FE51:C996: bytes=32 time<1ms TTL=126
+Reply from 2001:DB8:ACAD:1:205:5EFF:FE51:C996: bytes=32 time=12ms TTL=126
+
+Ping statistics for 2001:DB8:ACAD:1:205:5EFF:FE51:C996:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 14ms, Average = 6ms
 ```
