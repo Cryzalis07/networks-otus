@@ -258,3 +258,17 @@ Gig0/2                       disabled 999        auto    auto  10/100/1000BaseTX
 |   Функция       |   Настройка по умолчанию    |
 |   Функция       |   Настройка по умолчанию    |
 
+
+
+
+
+
+| Функция | Настройка по умолчанию |
+| --- | --- |
+| Защита портов | Disabled |
+| Максимальное количество записей MAC‑адресов | 1 |
+| Режим проверки на нарушение безопасности | Shutdown |
+| Aging Time | 0 мин |
+| Aging Type | Absolute |
+| Secure Static Address Aging | Disabled |
+| Sticky MAC Address | 0 |
