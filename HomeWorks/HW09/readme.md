@@ -261,3 +261,178 @@ Gig0/2                       disabled 999        auto    auto  10/100/1000BaseTX
 | Aging Type | Absolute |
 | Secure Static Address Aging | Disabled |
 | Sticky MAC Address | 0 |
+
+```
+S1(config)#int f0/6
+S1(config-if)#sw port-security 
+S1(config-if)#sw port-security maximum 3
+S1(config-if)#sw port-security violation restrict 
+S1(config-if)#sw port-security aging time 60
+```
+
+Команда sw port-security aging type не работает в Cisco Packet Tracer.
+
+```
+S1#sh port-security int f0/6
+Port Security              : Enabled
+Port Status                : Secure-up
+Violation Mode             : Restrict
+Aging Time                 : 60 mins
+Aging Type                 : Absolute
+SecureStatic Address Aging : Disabled
+Maximum MAC Addresses      : 3
+Total MAC Addresses        : 1
+Configured MAC Addresses   : 0
+Sticky MAC Addresses       : 0
+Last Source Address:Vlan   : 0005.5E7B.B496:10
+Security Violation Count   : 0
+```
+
+```
+S1#sh port-security address 
+               Secure Mac Address Table
+-----------------------------------------------------------------------------
+Vlan    Mac Address       Type                          Ports   Remaining Age
+                                                                   (mins)
+----    -----------       ----                          -----   -------------
+10	0005.5E7B.B496	DynamicConfigured	FastEthernet0/6		-
+-----------------------------------------------------------------------------
+Total Addresses in System (excluding one mac per port)     : 0
+Max Addresses limit in System (excluding one mac per port) : 1024
+```
+
+```
+S2(config)#int f0/18
+S2(config-if)#sw port-security 
+S2(config-if)#sw port-security mac-address sticky
+S2(config-if)#sw port-security maximum 2
+S2(config-if)#sw port-security violation protect 
+S2(config-if)#sw port-security aging time 60
+S2#sh port-security int f0/18
+Port Security              : Enabled
+Port Status                : Secure-up
+Violation Mode             : Protect
+Aging Time                 : 60 mins
+Aging Type                 : Absolute
+SecureStatic Address Aging : Disabled
+Maximum MAC Addresses      : 2
+Total MAC Addresses        : 1
+Configured MAC Addresses   : 0
+Sticky MAC Addresses       : 1
+Last Source Address:Vlan   : 0009.7C10.6A8A:10
+Security Violation Count   : 0
+S2#sh port-security address 
+               Secure Mac Address Table
+-----------------------------------------------------------------------------
+Vlan    Mac Address       Type                          Ports   Remaining Age
+                                                                   (mins)
+----    -----------       ----                          -----   -------------
+  10    0009.7C10.6A8A    SecureSticky                  Fa0/18       -
+-----------------------------------------------------------------------------
+Total Addresses in System (excluding one mac per port)     : 0
+Max Addresses limit in System (excluding one mac per port) : 1024
+```
+
+Шаг 5. Реализовать безопасность DHCP snooping.
+
+```
+S2(config)#ip dhcp snooping 
+S2(config)#ip dhcp snooping vlan 10
+S2(config)#int f0/18
+S2(config-if)#ip dhcp snooping limit rate 5
+S2(config-if)#int f0/1
+S2(config-if)#ip dhcp snooping trust
+S2#sh ip dhcp snooping 
+Switch DHCP snooping is enabled
+DHCP snooping is configured on following VLANs:
+10
+Insertion of option 82 is enabled
+Option 82 on untrusted port is not allowed
+Verification of hwaddr field is enabled
+Interface                  Trusted    Rate limit (pps)
+-----------------------    -------    ----------------
+FastEthernet0/1            yes        unlimited       
+FastEthernet0/18           no         5       
+```
+
+```
+C:\>ipconfig /release
+
+   IP Address......................: 0.0.0.0
+   Subnet Mask.....................: 0.0.0.0
+   Default Gateway.................: 0.0.0.0
+   DNS Server......................: 0.0.0.0
+
+C:\>ipconfig /renew
+
+   IP Address......................: 192.168.10.10
+   Subnet Mask.....................: 255.255.255.0
+   Default Gateway.................: 192.168.10.1
+   DNS Server......................: 0.0.0.0
+
+S2#sh ip dhcp snooping binding 
+MacAddress          IpAddress        Lease(sec)  Type           VLAN  Interface
+------------------  ---------------  ----------  -------------  ----  -----------------
+00:09:7C:10:6A:8A   192.168.10.10    0           dhcp-snooping  10    FastEthernet0/18
+Total number of bindings: 1  
+```
+
+Шаг 6. Реализация PortFast и BPDU Guard.
+
+
+```
+S1(config)#int ra f0/5-6
+S1(config-if-range)#spanning-tree portfast
+S1(config)#spanning-tree portfast bpduguard default
+S1#show spanning-tree interface f0/6 detail
+
+
+
+Port 6 (FastEthernet0/6) of VLAN0010 is designated forwarding
+  Port path cost 19, Port priority 128, Port Identifier 128.6
+  Designated root has priority 32778, address 00E0.8FAD.810B
+  Designated bridge has priority 32778, address 00E0.8FAD.810B
+  Designated port id is 128.6, designated path cost 19
+  Timers: message age 16, forward delay 0, hold 0
+  Number of transitions to forwarding state: 1
+  The port is in the portfast mode
+  Link type is point-to-point by default
+```
+
+```
+S2(config)#int f0/18
+S2(config-if)#spanning-tree portfast
+S2(config)#spanning-tree portfast bpduguard default
+S2#sh spanning-tree int f0/18 detail 
+
+
+
+Port 18 (FastEthernet0/18) of VLAN0010 is designated forwarding
+  Port path cost 19, Port priority 128, Port Identifier 128.18
+  Designated root has priority 32778, address 00E0.8FAD.810B
+  Designated bridge has priority 32778, address 00E0.F92C.07B0
+  Designated port id is 128.18, designated path cost 19
+  Timers: message age 16, forward delay 0, hold 0
+  Number of transitions to forwarding state: 1
+  The port is in the portfast mode
+  Link type is point-to-point by default
+```
+
+Шаг 7. Проверьте наличие сквозного ⁪подключения.
+
+```
+C:\>ping 192.168.10.10
+
+Pinging 192.168.10.10 with 32 bytes of data:
+
+Reply from 192.168.10.10: bytes=32 time<1ms TTL=128
+Reply from 192.168.10.10: bytes=32 time<1ms TTL=128
+Reply from 192.168.10.10: bytes=32 time<1ms TTL=128
+Reply from 192.168.10.10: bytes=32 time<1ms TTL=128
+
+Ping statistics for 192.168.10.10:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+```
+
