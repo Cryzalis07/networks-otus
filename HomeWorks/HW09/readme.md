@@ -435,4 +435,3 @@ Ping statistics for 192.168.10.10:
 Approximate round trip times in milli-seconds:
     Minimum = 0ms, Maximum = 0ms, Average = 0ms
 ```
-
