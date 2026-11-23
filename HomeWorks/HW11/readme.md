@@ -35,6 +35,12 @@
 
 ### Часть 2. Настройка и проверка списков расширенного контроля доступа.
 
+### Часть 3. Настройте транков (магистральных каналов).
+
+### Часть 4. Настройка маршрутизации.
+
+### Часть 5. Настройка удаленного доступа.
+
 ## Решение:
 
 ### Часть 1. Создание сети и настройка основных параметров устройства.
@@ -158,17 +164,148 @@ S1(config-if-range)#sw ac vlan 999
 ```
 
 ```
-S1(config)#vlan 20
-
+S2(config)#vlan 20
+S2(config-vlan)#name Management
+S2(config-vlan)#vlan 30
+S2(config-vlan)#name Operations
+S2(config-vlan)#vlan 40
+S2(config-vlan)#name Sales
+S2(config-vlan)#vlan 999
+S2(config-vlan)#name ParkingLot
+S2(config-vlan)#vlan 1000
+S2(config-vlan)#name Native
+S2(config-vlan)#int vlan 20
+S2(config-if)#ip address 10.20.0.3 255.255.255.0
+S2(config-if)#exit
+S2(config)#ip default-gateway 10.20.0.1
+S2(config)#int ra f0/2-4, f0/6-17, f0/19-24, g0/1-2
+S2(config-if-range)#sw mo ac
+S2(config-if-range)#sw ac vlan 999
 ```
-
-
-
 
 Шаг 2. Назначьте сети VLAN соответствующим интерфейсам коммутатора.
 
+```
+S1(config)#int f0/6
+S1(config-if)#sw mo ac
+S1(config-if)#sw ac vlan 30
+S1#sh vlan br
 
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Fa0/1, Fa0/5
+20   Management                       active    
+30   Operations                       active    Fa0/6
+40   Sales                            active    
+999  ParkingLot                       active    Fa0/2, Fa0/3, Fa0/4, Fa0/7
+                                                Fa0/8, Fa0/9, Fa0/10, Fa0/11
+                                                Fa0/12, Fa0/13, Fa0/14, Fa0/15
+                                                Fa0/16, Fa0/17, Fa0/18, Fa0/19
+                                                Fa0/20, Fa0/21, Fa0/22, Fa0/23
+                                                Fa0/24, Gig0/1, Gig0/2
+1000 Native                           active    
+1002 fddi-default                     active    
+1003 token-ring-default               active    
+1004 fddinet-default                  active    
+1005 trnet-default                    active 
+```
 
+```
+S2(config)#int f0/18
+S2(config-if)#sw mo ac
+S2(config-if)#sw ac vlan 40
+S2(config-if)#end
+S2#sh vlan br
 
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Fa0/1, Fa0/5
+20   Management                       active    
+30   Operations                       active    
+40   Sales                            active    Fa0/18
+999  ParkingLot                       active    Fa0/2, Fa0/3, Fa0/4, Fa0/6
+                                                Fa0/7, Fa0/8, Fa0/9, Fa0/10
+                                                Fa0/11, Fa0/12, Fa0/13, Fa0/14
+                                                Fa0/15, Fa0/16, Fa0/17, Fa0/19
+                                                Fa0/20, Fa0/21, Fa0/22, Fa0/23
+                                                Fa0/24, Gig0/1, Gig0/2
+1000 Native                           active    
+1002 fddi-default                     active    
+1003 token-ring-default               active    
+1004 fddinet-default                  active    
+1005 trnet-default                    active    
+```
+
+### Часть 3. Настройте транки (магистральные каналы).
+
+Шаг 1. Вручную настройте магистральный интерфейс F0/1.
+
+```
+S1(config)#int f0/1
+S1(config-if)#sw mo tr
+S1(config-if)#sw trunk native vlan 1000
+S1(config-if)#sw tr allowed vlan 20,30,40,1000
+S1(config-if)#end
+S1#sh int tru
+Port        Mode         Encapsulation  Status        Native vlan
+Fa0/1       on           802.1q         trunking      1000
+
+Port        Vlans allowed on trunk
+Fa0/1       20,30,40,1000
+
+Port        Vlans allowed and active in management domain
+Fa0/1       20,30,40,1000
+
+Port        Vlans in spanning tree forwarding state and not pruned
+Fa0/1       20,30,40,1000
+```
+
+```
+S2(config)#int f0/1
+S2(config-if)#sw mo tr
+S2(config-if)#sw tr native vlan 1000
+S2(config-if)#sw tr allowed vlan 20,30,40,1000
+S2(config-if)#end
+S2#sh int tru
+Port        Mode         Encapsulation  Status        Native vlan
+Fa0/1       on           802.1q         trunking      1000
+
+Port        Vlans allowed on trunk
+Fa0/1       20,30,40,1000
+
+Port        Vlans allowed and active in management domain
+Fa0/1       20,30,40,1000
+
+Port        Vlans in spanning tree forwarding state and not pruned
+Fa0/1       none
+```
+
+Шаг 2. Вручную настройте магистральный интерфейс F0/5 на коммутаторе S1.
+
+```
+S1(config)#int f0/5
+S1(config-if)#sw mo tr
+S1(config-if)#sw tr native vlan 1000
+S1(config-if)#sw tr allowed vlan 20,30,40,1000
+S1(config-if)#end
+S1#sh int tru
+Port        Mode         Encapsulation  Status        Native vlan
+Fa0/1       on           802.1q         trunking      1000
+Fa0/5       on           802.1q         trunking      1000
+
+Port        Vlans allowed on trunk
+Fa0/1       20,30,40,1000
+Fa0/5       20,30,40,1000
+
+Port        Vlans allowed and active in management domain
+Fa0/1       20,30,40,1000
+Fa0/5       20,30,40,1000
+
+Port        Vlans in spanning tree forwarding state and not pruned
+Fa0/1       20,30,40,1000
+Fa0/5       20,30,40,1000
+```
+
+### Часть 4. Настройте маршрутизацию.
 
 
