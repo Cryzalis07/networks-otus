@@ -308,4 +308,200 @@ Fa0/5       20,30,40,1000
 
 ### Часть 4. Настройте маршрутизацию.
 
+Шаг 1. Настройка маршрутизации между сетями VLAN на R1.
 
+```
+R1#conf t
+R1(config)#int g0/0/1
+R1(config-if)#no sh
+R1(config-if)#int g0/0/1.20
+R1(config-subif)#encapsulation dot1Q 20
+R1(config-subif)#ip ad 10.20.0.1 255.255.255.0
+R1(config-subif)#description Default Gateway for VLAN 20 Management
+R1(config-subif)#int g0/0/1.30
+R1(config-subif)#encapsulation dot1Q 30
+R1(config-subif)#ip address 10.30.0.1 255.255.255.0
+R1(config-subif)#description Default Gateway for VLAN 30 Operations
+R1(config-subif)#int g0/0/1.40
+R1(config-subif)#encapsulation dot1Q 40
+R1(config-subif)#ip address 10.40.0.1 255.255.255.0
+R1(config-subif)#description Default Gateway for VLAN 40 Sales
+R1(config-subif)#int g0/0/1.1000
+R1(config-subif)#encapsulation dot1Q 1000 native
+R1(config-subif)#description Native VLAN
+R1(config)#int loopback 1
+R1(config-if)#ip address 172.16.1.1 255.255.255.0
+```
+
+```
+R1#sh ip int br
+Interface              IP-Address      OK? Method Status                Protocol 
+GigabitEthernet0/0/0   unassigned      YES unset  administratively down down 
+GigabitEthernet0/0/1   unassigned      YES unset  up                    up 
+GigabitEthernet0/0/1.2010.20.0.1       YES manual up                    up 
+GigabitEthernet0/0/1.3010.30.0.1       YES manual up                    up 
+GigabitEthernet0/0/1.4010.40.0.1       YES manual up                    up 
+GigabitEthernet0/0/1.1000unassigned      YES unset  up                    up 
+Loopback1              172.16.1.1      YES manual up                    up 
+Vlan1                  unassigned      YES unset  administratively down down
+```
+
+Шаг 2. Настройка интерфейса R2 g0/0/1 с использованием адреса из таблицы и маршрута по умолчанию с адресом следующего перехода 10.20.0.1.
+
+```
+R2>en
+Password: 
+R2#conf t
+R2(config)#int g0/0/1
+R2(config-if)#ip address 10.20.0.4 255.255.255.0
+R2(config-if)#no sh
+R2(config-if)#exi
+R2(config)#ip route 0.0.0.0 0.0.0.0 10.20.0.1
+```
+
+### Часть 5. Настройте удаленный доступ.
+
+Шаг 1. Настройте все сетевые устройства для базовой поддержки SSH.
+
+```
+S1(config)#username sshadmin privilege 15 secret $cisco123!
+S1(config)#ip domain-name ccna-lab.com
+S1(config)#crypto key generate rsa
+The name for the keys will be: S1.ccna-lab.com
+Choose the size of the key modulus in the range of 360 to 4096 for your
+  General Purpose Keys. Choosing a key modulus greater than 512 may take
+  a few minutes.
+
+How many bits in the modulus [512]: 1024
+% Generating 1024 bit RSA keys, keys will be non-exportable...[OK]
+
+S1(config)#ip ssh version 2
+S1(config)#line vty 0 4
+S1(config-line)#login local 
+S1(config-line)#transport input ssh
+```
+
+```
+S2(config)#username sshadmin privilege 15 secret $cisco123!
+S2(config)#ip domain-name ccna-lab.com
+S2(config)#crypto key generate rsa
+The name for the keys will be: S2.ccna-lab.com
+Choose the size of the key modulus in the range of 360 to 4096 for your
+  General Purpose Keys. Choosing a key modulus greater than 512 may take
+  a few minutes.
+
+How many bits in the modulus [512]: 1024
+% Generating 1024 bit RSA keys, keys will be non-exportable...[OK]
+
+S2(config)#ip ssh version 2
+*Mar 1 2:3:37.410: %SSH-5-ENABLED: SSH 1.99 has been enabled
+S2(config)#line vty 0 4
+S2(config-line)#login local 
+S2(config-line)#transport input ssh
+```
+
+```
+R1(config)#username sshadmin privilege 15 secret $cisco123!
+R1(config)#ip domain-name ccna-lab.com
+R1(config)#crypto key generate rsa
+The name for the keys will be: R1.ccna-lab.com
+Choose the size of the key modulus in the range of 360 to 4096 for your
+  General Purpose Keys. Choosing a key modulus greater than 512 may take
+  a few minutes.
+How many bits in the modulus [512]: 1024
+% Generating 1024 bit RSA keys, keys will be non-exportable...[OK]
+R1(config)#ip ssh version 2
+*Mar 1 2:7:11.431: %SSH-5-ENABLED: SSH 1.99 has been enabled
+R1(config)#line vty 0 4
+R1(config-line)#login local
+R1(config-line)#tra
+R1(config-line)#transport in
+R1(config-line)#transport input ssh
+```
+
+```
+R2(config)#username sshadmin privilege 15 secret $cisco123!
+R2(config)#ip domain-name ccna-lab.com
+R2(config)#crypto key generate rsa
+The name for the keys will be: R2.ccna-lab.com
+Choose the size of the key modulus in the range of 360 to 4096 for your
+  General Purpose Keys. Choosing a key modulus greater than 512 may take
+  a few minutes.
+How many bits in the modulus [512]: 1024
+% Generating 1024 bit RSA keys, keys will be non-exportable...[OK]
+R2(config)#ip ssh version 2
+*Mar 1 2:8:48.244: %SSH-5-ENABLED: SSH 1.99 has been enabled
+R2(config)#line vty 0 4
+R2(config-line)#login local
+R2(config-line)#transport input ssh
+```
+
+Шаг 2. Включите защищенные веб-службы с проверкой подлинности на R1.
+
+
+
+### Часть 6. Проверка подключения
+
+```
+C:\>ping 10.40.0.10
+
+Pinging 10.40.0.10 with 32 bytes of data:
+
+Reply from 10.40.0.10: bytes=32 time<1ms TTL=127
+Reply from 10.40.0.10: bytes=32 time=3ms TTL=127
+Reply from 10.40.0.10: bytes=32 time<1ms TTL=127
+Reply from 10.40.0.10: bytes=32 time=3ms TTL=127
+
+Ping statistics for 10.40.0.10:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 3ms, Average = 1ms
+```
+
+```
+C:\>ping 10.20.0.1
+
+Pinging 10.20.0.1 with 32 bytes of data:
+
+Reply from 10.20.0.1: bytes=32 time<1ms TTL=255
+Reply from 10.20.0.1: bytes=32 time=3ms TTL=255
+Reply from 10.20.0.1: bytes=32 time<1ms TTL=255
+Reply from 10.20.0.1: bytes=32 time<1ms TTL=255
+
+Ping statistics for 10.20.0.1:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 3ms, Average = 0ms
+```
+
+```
+C:\>ping 10.30.0.10
+
+Pinging 10.30.0.10 with 32 bytes of data:
+
+Reply from 10.30.0.10: bytes=32 time<1ms TTL=127
+Reply from 10.30.0.10: bytes=32 time<1ms TTL=127
+Reply from 10.30.0.10: bytes=32 time<1ms TTL=127
+Reply from 10.30.0.10: bytes=32 time<1ms TTL=127
+
+Ping statistics for 10.30.0.10:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+```
+
+```
+C:\>ping 10.30.0.10
+
+Pinging 10.30.0.10 with 32 bytes of data:
+
+Reply from 10.30.0.10: bytes=32 time<1ms TTL=127
+Reply from 10.30.0.10: bytes=32 time<1ms TTL=127
+Reply from 10.30.0.10: bytes=32 time<1ms TTL=127
+Reply from 10.30.0.10: bytes=32 time<1ms TTL=127
+
+Ping statistics for 10.30.0.10:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+```
