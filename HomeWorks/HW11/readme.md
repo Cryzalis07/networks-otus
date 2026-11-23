@@ -41,6 +41,10 @@
 
 ### Часть 5. Настройка удаленного доступа.
 
+### Часть 6. Проверка подключения.
+
+### Часть 7. Настройка и проверка списков контроля доступа (ACL)
+
 ## Решение:
 
 ### Часть 1. Создание сети и настройка основных параметров устройства.
@@ -438,9 +442,13 @@ R2(config-line)#transport input ssh
 
 Шаг 2. Включите защищенные веб-службы с проверкой подлинности на R1.
 
+Так как в CPT нет возможности создать https, добавим сервер на порт g0/0/0.
 
+Присвоим IP 10.50.0.2 /24, шлюз будет 10.50.0.1 /24.
 
-### Часть 6. Проверка подключения
+### Часть 6. Проверка подключения.
+
+С PC-A
 
 ```
 C:\>ping 10.40.0.10
@@ -474,21 +482,7 @@ Approximate round trip times in milli-seconds:
     Minimum = 0ms, Maximum = 3ms, Average = 0ms
 ```
 
-```
-C:\>ping 10.30.0.10
-
-Pinging 10.30.0.10 with 32 bytes of data:
-
-Reply from 10.30.0.10: bytes=32 time<1ms TTL=127
-Reply from 10.30.0.10: bytes=32 time<1ms TTL=127
-Reply from 10.30.0.10: bytes=32 time<1ms TTL=127
-Reply from 10.30.0.10: bytes=32 time<1ms TTL=127
-
-Ping statistics for 10.30.0.10:
-    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
-Approximate round trip times in milli-seconds:
-    Minimum = 0ms, Maximum = 0ms, Average = 0ms
-```
+C PC-B
 
 ```
 C:\>ping 10.30.0.10
@@ -505,3 +499,74 @@ Ping statistics for 10.30.0.10:
 Approximate round trip times in milli-seconds:
     Minimum = 0ms, Maximum = 0ms, Average = 0ms
 ```
+
+```
+C:\>ping 10.20.0.1
+
+Pinging 10.20.0.1 with 32 bytes of data:
+
+Reply from 10.20.0.1: bytes=32 time<1ms TTL=255
+Reply from 10.20.0.1: bytes=32 time<1ms TTL=255
+Reply from 10.20.0.1: bytes=32 time<1ms TTL=255
+Reply from 10.20.0.1: bytes=32 time<1ms TTL=255
+
+Ping statistics for 10.20.0.1:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+```
+
+```
+C:\>ping 172.16.1.1
+
+Pinging 172.16.1.1 with 32 bytes of data:
+
+Reply from 172.16.1.1: bytes=32 time<1ms TTL=255
+Reply from 172.16.1.1: bytes=32 time<1ms TTL=255
+Reply from 172.16.1.1: bytes=32 time<1ms TTL=255
+Reply from 172.16.1.1: bytes=32 time<1ms TTL=255
+
+Ping statistics for 172.16.1.1:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+```
+
+```
+C:\>ping 10.50.0.2
+
+Pinging 10.50.0.2 with 32 bytes of data:
+
+Reply from 10.50.0.2: bytes=32 time<1ms TTL=127
+Reply from 10.50.0.2: bytes=32 time<1ms TTL=127
+Reply from 10.50.0.2: bytes=32 time<1ms TTL=127
+Reply from 10.50.0.2: bytes=32 time<1ms TTL=127
+
+Ping statistics for 10.50.0.2:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+```
+
+```
+C:\>ssh -l sshadmin 10.20.0.1
+
+Password: 
+
+Authorized Access Only!
+
+R1#
+```
+
+```
+C:\>ssh -l sshadmin 172.16.1.1
+
+Password:
+
+Authorized Access Only!
+
+R1#
+```
+
+### Часть 7. Настройка и проверка списков контроля доступа (ACL).
+
