@@ -23,6 +23,7 @@
 
 |   VLAN         |       Имя    |   Назначенный интерфейс                |        
 |  ------------  |  ----------- |  ------------------------------------- |
+|  20            |  Management  |  -                                     |
 |  30            |  Operations  |  S1: F0/6                              |
 |  40            |  Sales       |  S2: F0/18                             |
 |  999           |  ParkingLot  |  S1: F0/2-4, F0/7-24, G0/1-2           |
@@ -569,4 +570,58 @@ R1#
 ```
 
 ### Часть 7. Настройка и проверка списков контроля доступа (ACL).
+
+Шаг 1. Проанализируйте требования к сети и политике безопасности для планирования реализации ACL.
+
+Политика 1. Сеть Sales не может использовать SSH в сети Management (но в  другие сети SSH разрешен).
+
+Политика 2. Сеть Sales не имеет доступа по протоколу http\https на сервере 10.50.0.2 (Изменил из-за ограничений CPT)
+
+Политика 3. Сеть Sales не может отправлять эхо-запросы ICMP в сети Operations или Management. Разрешены эхо-запросы ICMP к другим адресатам.
+
+Политика 4. Cеть Operations не может отправлять ICMP эхо-запросы в сеть Sales. Разрешены эхо-запросы ICMP к другим адресатам. 
+
+Шаг 2. Разработка и применение расширенных списков доступа, которые будут соответствовать требованиям политики безопасности.
+
+Создадим ACL для VLAN Sales и назначим его на интерфейс g0/0/1.40.
+
+```
+R1(config)#ip access-list extended ACL_SALES
+R1(config-ext-nacl)#deny tcp 10.40.0.0 0.0.0.255 10.20.0.0 0.0.0.255 eq 22
+R1(config-ext-nacl)#deny tcp 10.40.0.0 0.0.0.255 10.50.0.0 0.0.0.255 eq 80
+R1(config-ext-nacl)#deny tcp 10.40.0.0 0.0.0.255 10.50.0.0 0.0.0.255 eq 443
+R1(config-ext-nacl)#deny icmp 10.40.0.0 0.0.0.255 10.30.0.0 0.0.0.255 echo
+R1(config-ext-nacl)#deny icmp 10.40.0.0 0.0.0.255 10.20.0.0 0.0.0.255 echo
+R1(config-ext-nacl)#permit ip any any
+R1(config)#int g0/0/1.40
+R1(config-subif)#ip access-group ACL_SALES in
+```
+
+Создадим ACL для VLAN Operations и назначим его на интерфейс g0/0/1.30.
+
+```
+R1(config)#ip access-list extended ACL_OPERATIONS
+R1(config-ext-nacl)#deny icmp 10.30.0.0 0.0.0.255 10.40.0.0 0.0.0.255 echo
+R1(config-ext-nacl)#permit ip any
+R1(config-subif)#int g0/0/1.30
+R1(config-subif)#ip access-group ACL_OPERATIONS in
+```
+
+Шаг 3. Убедитесь, что политики безопасности применяются развернутыми списками доступа.
+
+### С PC-A PING 10.40.0.10
+
+```
+C:\>ping 10.40.0.10
+
+Pinging 10.40.0.10 with 32 bytes of data:
+
+Reply from 10.30.0.1: Destination host unreachable.
+Reply from 10.30.0.1: Destination host unreachable.
+Reply from 10.30.0.1: Destination host unreachable.
+Reply from 10.30.0.1: Destination host unreachable.
+
+Ping statistics for 10.40.0.10:
+    Packets: Sent = 4, Received = 0, Lost = 4 (100% loss)
+```
 
