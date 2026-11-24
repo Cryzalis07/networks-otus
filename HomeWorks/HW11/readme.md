@@ -609,7 +609,7 @@ R1(config-subif)#ip access-group ACL_OPERATIONS in
 
 Шаг 3. Убедитесь, что политики безопасности применяются развернутыми списками доступа.
 
-### С PC-A PING 10.40.0.10
+С PC-A PING 10.40.0.10 - Сбой
 
 ```
 C:\>ping 10.40.0.10
@@ -624,4 +624,80 @@ Reply from 10.30.0.1: Destination host unreachable.
 Ping statistics for 10.40.0.10:
     Packets: Sent = 4, Received = 0, Lost = 4 (100% loss)
 ```
+
+С PC-A PING 10.20.0.1 - Успех
+
+```
+C:\>ping 10.20.0.1
+
+Pinging 10.20.0.1 with 32 bytes of data:
+
+Reply from 10.20.0.1: bytes=32 time<1ms TTL=255
+Reply from 10.20.0.1: bytes=32 time<1ms TTL=255
+Reply from 10.20.0.1: bytes=32 time<1ms TTL=255
+Reply from 10.20.0.1: bytes=32 time<1ms TTL=255
+
+Ping statistics for 10.20.0.1:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+```
+
+С PC-B PING 10.30.0.10 - Сбой
+
+```
+C:\>ping 10.30.0.10
+
+Pinging 10.30.0.10 with 32 bytes of data:
+
+Reply from 10.40.0.1: Destination host unreachable.
+Reply from 10.40.0.1: Destination host unreachable.
+Reply from 10.40.0.1: Destination host unreachable.
+Reply from 10.40.0.1: Destination host unreachable.
+
+Ping statistics for 10.30.0.10:
+    Packets: Sent = 4, Received = 0, Lost = 4 (100% loss),
+```
+
+С PC-B PING 10.20.0.1 - Сбой
+
+```
+C:\>ping 10.20.0.1
+
+Pinging 10.20.0.1 with 32 bytes of data:
+
+Reply from 10.40.0.1: Destination host unreachable.
+Reply from 10.40.0.1: Destination host unreachable.
+Reply from 10.40.0.1: Destination host unreachable.
+Reply from 10.40.0.1: Destination host unreachable.
+
+Ping statistics for 10.20.0.1:
+    Packets: Sent = 4, Received = 0, Lost = 4 (100% loss),
+```
+
+С PC-B PING 172.16.1.1 - Успех
+
+```
+C:\>ping 172.16.1.1
+
+Pinging 172.16.1.1 with 32 bytes of data:
+
+Reply from 172.16.1.1: bytes=32 time<1ms TTL=255
+Reply from 172.16.1.1: bytes=32 time<1ms TTL=255
+Reply from 172.16.1.1: bytes=32 time=3ms TTL=255
+Reply from 172.16.1.1: bytes=32 time<1ms TTL=255
+
+Ping statistics for 172.16.1.1:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 3ms, Average = 0ms
+```
+
+С PC-B HTTPS 10.50.0.2 - Сбой
+
+![](PCB_HTTPS_Serv.jpg)
+
+С PC-A HTTPS 10.50.0.2 - Успех
+
+![](PCA_HTTPS_Serv.jpg)
 
