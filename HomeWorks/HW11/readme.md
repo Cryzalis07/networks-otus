@@ -701,3 +701,23 @@ Approximate round trip times in milli-seconds:
 
 ![](PCA_HTTPS_Serv.jpg)
 
+С PC-B SSH 10.20.0.4 - Сбой
+
+```
+C:\>ssh -l sshadmin 10.20.0.4
+
+% Connection timed out; remote host not responding
+```
+
+С PC-B SSH 172.16.1.1 - Успех
+
+```
+C:\>ssh -l sshadmin 172.16.1.1
+
+Password: 
+
+Authorized Access Only!
+
+R1#
+```
+
